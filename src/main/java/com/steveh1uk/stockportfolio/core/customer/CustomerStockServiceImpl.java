@@ -1,4 +1,4 @@
-package com.steveh1uk.stockportfolio.core;
+package com.steveh1uk.stockportfolio.core.customer;
 
 import org.springframework.stereotype.Service;
 

@@ -1,6 +1,6 @@
 package com.steveh1uk.stockportfolio;
 
-import com.steveh1uk.stockportfolio.core.CustomerStockService;
+import com.steveh1uk.stockportfolio.core.customer.CustomerStockService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
