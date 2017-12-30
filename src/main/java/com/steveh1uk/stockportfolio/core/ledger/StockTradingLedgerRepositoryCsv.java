@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.io.*;
 
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,7 +37,7 @@ public class StockTradingLedgerRepositoryCsv implements StockTradingLedgerReposi
         int recordNumber = 1;
         ClassLoader classLoader = this.getClass().getClassLoader();
 
-        try (Reader in = new FileReader(new File(classLoader.getResource(STOCK_LEDGER).getFile())) ) {
+        try (Reader in = new FileReader(new File(classLoader.getResource(stockLedgerFileName()).getFile())) ) {
 
             Iterable<CSVRecord> records = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(in);
             for (CSVRecord record : records) {
@@ -56,11 +57,11 @@ public class StockTradingLedgerRepositoryCsv implements StockTradingLedgerReposi
                 recordNumber ++;
             }
         }
-        catch(java.lang.IllegalArgumentException e) {
-            throw new StockLedgerParseException("Error in record " + recordNumber, e);
+        catch(DateTimeParseException | IllegalArgumentException e) {
+            throw new StockLedgerParseException("Error in record " + recordNumber + " within " + stockLedgerFileName() + " because " + e.getMessage(), e);
         }
         catch (IOException | NullPointerException e) {
-            throw new StockLedgerParseException("Can not initialise the stock ledger csv file " + recordNumber, e);
+            throw new StockLedgerParseException("Can not initialise the stock ledger csv file " + stockLedgerFileName(), e);
         }
 
         return stockTransactions;
@@ -73,5 +74,11 @@ public class StockTradingLedgerRepositoryCsv implements StockTradingLedgerReposi
         else {
             return Integer.parseInt(value);
         }
+    }
+
+
+    // Allow for raining day testing without mocks
+    protected String stockLedgerFileName() {
+        return STOCK_LEDGER;
     }
 }

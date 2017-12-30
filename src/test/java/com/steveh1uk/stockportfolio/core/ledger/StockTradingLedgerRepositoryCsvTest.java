@@ -1,14 +1,18 @@
 package com.steveh1uk.stockportfolio.core.ledger;
 
 import com.steveh1uk.stockportfolio.core.customer.CustomerStockRequest;
+import org.hamcrest.core.IsInstanceOf;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class StockTradingLedgerRepositoryCsvTest {
 
@@ -23,13 +27,9 @@ public class StockTradingLedgerRepositoryCsvTest {
         List<StockTransaction> stockTransactions = new StockTradingLedgerRepositoryCsv().findCustomerStockTransactions(customerStockRequest);
 
         assertEquals("Result size differs", 10, stockTransactions.size());
-
-        System.out.println(stockTransactions.size() + "" + stockTransactions);
-
         assertEquals("Lists are NOT the same", expectedResultsForRequestOne(), stockTransactions);
-
     }
-    
+
     private List<StockTransaction> expectedResultsForRequestOne() {
 
         List<StockTransaction> expectedResultsRequestOne = new ArrayList<>();
@@ -46,7 +46,112 @@ public class StockTradingLedgerRepositoryCsvTest {
         expectedResultsRequestOne.add(new StockTransaction.Builder().setTradeDateTime(LocalDateTime.parse("2017-01-03T05:00:00")).setCustomerId(CUSTOMER_ID_REQUEST_ONE).setStockCode("NOK").setUnitsBought(4).setUnitsSold(0).build());
 
         return expectedResultsRequestOne;
-        
+
+    }
+
+
+    /*
+     * ==================================================================================================
+     *                                     Rainy day tests
+     * ==================================================================================================
+     */
+
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
+
+    @Test
+    public void stockLedgerNotFound() {
+
+        CustomerStockRequest customerStockRequest = new CustomerStockRequest(LocalDate.parse("2017-01-03"), CUSTOMER_ID_REQUEST_ONE);
+
+        thrown.expect(StockLedgerParseException.class);
+
+        thrown.expectMessage("Can not initialise the stock ledger csv file missing-stock-ledger.csv");
+
+        thrown.expectCause(IsInstanceOf.instanceOf(NullPointerException.class));
+
+        new StockTradingLedgerRepositoryCsv() {
+            protected String stockLedgerFileName() {
+                return "missing-stock-ledger.csv";
+            }
+        }.findCustomerStockTransactions(customerStockRequest);
+    }
+
+
+    @Test
+    public void invalidDateTimeOfTradeInStockLedger() {
+
+        CustomerStockRequest customerStockRequest = new CustomerStockRequest(LocalDate.parse("2017-01-03"), 4);
+
+        thrown.expect(StockLedgerParseException.class);
+
+        thrown.expectMessage("Error in record 5 within invalid-trade-date-stock-trading-ledger.csv because Text '2017-Jan-01T04:00:00Z' could not be parsed at index 5");
+
+        thrown.expectCause(IsInstanceOf.instanceOf(DateTimeParseException.class));
+
+        new StockTradingLedgerRepositoryCsv() {
+            protected String stockLedgerFileName() {
+                return "invalid-trade-date-stock-trading-ledger.csv";
+            }
+        }.findCustomerStockTransactions(customerStockRequest);
+    }
+
+
+
+    @Test
+    public void invalidCustomerIdInStockLedger() {
+
+        CustomerStockRequest customerStockRequest = new CustomerStockRequest(LocalDate.parse("2017-01-03"), 45); // Any Customer is OK
+
+        thrown.expect(StockLedgerParseException.class);
+
+        thrown.expectMessage("Error in record 3 within invalid-customer-id-stock-trading-ledger.csv because For input string: \"CUST-4\"");
+
+        thrown.expectCause(IsInstanceOf.instanceOf(NumberFormatException.class));
+
+        new StockTradingLedgerRepositoryCsv() {
+            protected String stockLedgerFileName() {
+                return "invalid-customer-id-stock-trading-ledger.csv";
+            }
+        }.findCustomerStockTransactions(customerStockRequest);
+    }
+
+    @Test
+    public void invalidStockBoughtInStockLedger() {
+
+        CustomerStockRequest customerStockRequest = new CustomerStockRequest(LocalDate.parse("2017-01-03"), 45); // Any Customer is OK
+
+        thrown.expect(StockLedgerParseException.class);
+
+        thrown.expectMessage("Error in record 2 within invalid-stock-bought-stock-trading-ledger.csv because For input string: \"FIVE\"");
+
+        thrown.expectCause(IsInstanceOf.instanceOf(NumberFormatException.class));
+
+        new StockTradingLedgerRepositoryCsv() {
+            protected String stockLedgerFileName() {
+                return "invalid-stock-bought-stock-trading-ledger.csv";
+            }
+        }.findCustomerStockTransactions(customerStockRequest);
+    }
+
+    @Test
+    public void invalidStockSoldInStockLedger() {
+
+        CustomerStockRequest customerStockRequest = new CustomerStockRequest(LocalDate.parse("2017-01-03"), 45); // Any Customer is OK
+
+        thrown.expect(StockLedgerParseException.class);
+
+        thrown.expectMessage("Error in record 22 within invalid-stock-sold-stock-trading-ledger.csv because For input string: \"3H\"");
+
+        thrown.expectCause(IsInstanceOf.instanceOf(NumberFormatException.class));
+
+        new StockTradingLedgerRepositoryCsv() {
+            protected String stockLedgerFileName() {
+                return "invalid-stock-sold-stock-trading-ledger.csv";
+            }
+        }.findCustomerStockTransactions(customerStockRequest);
     }
 
 }

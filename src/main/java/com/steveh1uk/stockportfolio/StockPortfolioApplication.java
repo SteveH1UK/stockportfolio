@@ -14,6 +14,10 @@ public class StockPortfolioApplication implements CommandLineRunner {
 	@Autowired
 	private CustomerStockService customerStockService;
 
+	/**
+	 * Run stock portfolio on the command line
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		SpringApplication application = new SpringApplication(StockPortfolioApplication.class);
 
@@ -23,10 +27,12 @@ public class StockPortfolioApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
-		customerStockService.findStockValues(null);
 
-
-
-		exit(0);
+		if (args.length > 2) {
+			customerStockService.findStockValues(null);
+		}
+		else {
+			System.out.println("No parameters entered - ignoring request");
+		}
 	}
 }

@@ -18,6 +18,8 @@ This project contains a service that exposes data for a customers “My stock po
 * The Stock Trading Ledger is a CSV file. This is (assumed) to be in ascending date order.
 * No pagination
 * Ignore any initial balance the customer has before the ledger starts. Therefore for some queries the Customer might have a negative amount of stock
+* Stock sorted on stock code
+* Integration tests require that the third party Rest service is up (no switch implemented to ignore these tests)
 
 
 
@@ -26,7 +28,8 @@ This project contains a service that exposes data for a customers “My stock po
 * ~~Working skeleton of non web project (improve knowledge of Spring Boot)~~  29 Jan
 * ~~Store on github~~ 29 Jan
 * ~~Create Repository for CSV and do “integration” testing for this using Apache CSV~~ 30 Jan
-* Raining day tests for CSV processing
-* End to end test (skeleton)
+* ~~Raining day tests for CSV processing~~ 30 Jan
+* ~~End to end test (skeleton)~~
 * Code find prices with mock to give expectations for data
 * Use free API rest service
+* Review Code
