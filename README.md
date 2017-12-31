@@ -29,7 +29,11 @@ This project contains a service that exposes data for a customers “My stock po
 * ~~Store on github~~ 29 Jan
 * ~~Create Repository for CSV and do “integration” testing for this using Apache CSV~~ 30 Jan
 * ~~Raining day tests for CSV processing~~ 30 Jan
-* ~~End to end test (skeleton)~~
+* ~~End to end test (skeleton)~~ 30 Jan
+* ~~Use free API rest service~~ 31 Jan
+* API rainy day stuff
+* Integrate API call in service
 * Code find prices with mock to give expectations for data
-* Use free API rest service
 * Review Code
+* Run maven build on clone and do everything on command line
+* Review Documentation
