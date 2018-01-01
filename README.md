@@ -10,7 +10,7 @@ This project contains a service that exposes data for a customers “My stock po
 
 
 ## Usage
-
+git
 
 
 ## Assumptions and notes about this project
