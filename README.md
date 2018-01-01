@@ -34,7 +34,7 @@ This project contains a service that exposes data for a customers “My stock po
 * ~~Use free API rest service~~ 31 Dec
 * ~~API rainy day stuff~~ 1 Jan
 * ~~Integrate API call in service~~ 1 Jan
-* Run maven build on clone and do everything on command line
+* Run maven build on clone and do everything on command line 
 * Review Code
 * Run maven build on clone and do everything on command line
 * Review Documentation
