@@ -12,6 +12,7 @@ This project contains a service that exposes data for a customers “My stock po
 ## Usage
 
 
+
 ## Assumptions and notes about this project
 * The Free Rest API used does NOT have historic data so when queries are made then the value is of the current value (but with the amount of stock the customer has)
 * Blackbury (BBRY) does not appear on the IPX API (Gives "Unknown symbol"). It used the code "BB" instead. Replaced BBRY with BB in the ledger file. 
