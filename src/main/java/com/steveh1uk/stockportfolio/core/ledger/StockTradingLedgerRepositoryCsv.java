@@ -5,10 +5,14 @@ import com.steveh1uk.stockportfolio.core.ledger.exception.StockLedgerParseExcept
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Repository;
 
-import java.io.*;
-
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -31,16 +35,18 @@ public class StockTradingLedgerRepositoryCsv implements StockTradingLedgerReposi
     private final static String UNITS_BOUGHT_HEADER = "Units bought";
     private final static String UNITS_SOLD_HEADER = "Units Sold";
 
+    @Autowired
+    ResourceLoader resourceloader;
+
     @Override
     public List<StockTransaction> findCustomerStockTransactions(CustomerStockRequest customerStockRequest) {
 
         List<StockTransaction> stockTransactions = new ArrayList<>();
         int recordNumber = 1;
-        ClassLoader classLoader = this.getClass().getClassLoader();
+        ClassPathResource classPathResource = new ClassPathResource(stockLedgerFileName());
+        try (Reader in = new InputStreamReader(classPathResource.getInputStream()) ) {
 
-        try (Reader in = new FileReader(new File(classLoader.getResource(stockLedgerFileName()).getFile())) ) {
-
-            Iterable<CSVRecord> records = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(in);
+                Iterable<CSVRecord> records = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(in);
             for (CSVRecord record : records) {
                 StockTransaction currentStockTransaction = new StockTransaction.Builder()
                         .setTradeDateTime(ZonedDateTime.parse(record.get(TRADE_DATE_TIME_HEADER)).toLocalDateTime())

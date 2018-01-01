@@ -37,6 +37,9 @@ public class CustomerStockServiceImpl implements CustomerStockService {
         return createCustomerStockResult(customerStockRequest, transformer.transform());
     }
 
+    /*
+    These are sanity tests since it is assumed that client inputs correct data - hence runtime error
+     */
     private void validateRequest(CustomerStockRequest customerStockRequest) {
 
     }

@@ -7,6 +7,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import java.io.FileNotFoundException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
@@ -66,12 +67,11 @@ public class StockTradingLedgerRepositoryCsvTest {
     public void stockLedgerNotFound() {
 
         CustomerStockRequest customerStockRequest = new CustomerStockRequest(LocalDate.parse("2017-01-03"), CUSTOMER_ID_REQUEST_ONE);
-
         thrown.expect(StockLedgerParseException.class);
 
         thrown.expectMessage("Can not initialise the stock ledger csv file missing-stock-ledger.csv");
 
-        thrown.expectCause(IsInstanceOf.instanceOf(NullPointerException.class));
+        thrown.expectCause(IsInstanceOf.instanceOf(FileNotFoundException.class));
 
         new StockTradingLedgerRepositoryCsv() {
             protected String stockLedgerFileName() {

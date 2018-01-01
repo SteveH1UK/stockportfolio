@@ -10,12 +10,20 @@ This project contains a service that exposes data for a customers “My stock po
 
 
 ## Usage
-git
+The following instructions cover running the project on linux:
+```
+git clone https://github.com/SteveH1UK/stockportfolio.git
+cd stockportfolio
+mvn package
+java -jar target/stockportfolio-0.0.1-SNAPSHOT.jar 2017-01-03 74893279
+```
+
+If this jar is required within another application (e.g. web front end)then call com.steveh1uk.stockportfolio.core.customer.CustomerStockService.findStockValues  
 
 
 ## Assumptions and notes about this project
 * The Free Rest API used does NOT have historic data so when queries are made then the value is of the current value (but with the amount of stock the customer has)
-* Blackbury (BBRY) does not appear on the IPX API (Gives "Unknown symbol"). It used the code "BB" instead. Replaced BBRY with BB in the ledger file. 
+* Blackbury (BBRY) does not appear on the IPX API (Gives "Unknown symbol"). This system uses the code "BB" instead. Replaced BBRY with BB in the ledger file. 
 * The Stock Trading Ledger is a CSV file. This is (assumed) to be in ascending date order.
 * No pagination
 * Ignore any initial balance the customer has before the ledger starts. Therefore for some queries the Customer might have a negative amount of stock
@@ -34,8 +42,8 @@ git
 * ~~Use free API rest service~~ 31 Dec
 * ~~API rainy day stuff~~ 1 Jan
 * ~~Integrate API call in service~~ 1 Jan
-* Run maven build on clone and do everything on command line 
+* ~~Run maven build on clone and do everything on command line~~ 1 Jan
+* Validation checks in service (for Date and customer id)
 * Review Code
-* Run maven build on clone and do everything on command line
 * Review Documentation
 * Code find prices with mock to give expectations for data
