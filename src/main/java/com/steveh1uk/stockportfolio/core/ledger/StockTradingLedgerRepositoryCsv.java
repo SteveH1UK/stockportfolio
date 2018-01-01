@@ -1,6 +1,7 @@
 package com.steveh1uk.stockportfolio.core.ledger;
 
 import com.steveh1uk.stockportfolio.core.customer.CustomerStockRequest;
+import com.steveh1uk.stockportfolio.core.ledger.exception.StockLedgerParseException;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;

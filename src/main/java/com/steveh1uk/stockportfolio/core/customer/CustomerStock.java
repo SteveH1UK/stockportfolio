@@ -54,7 +54,7 @@ public class CustomerStock implements Comparable<CustomerStock> {
         return "CustomerStock{" +
                 "stockCode='" + stockCode + '\'' +
                 ", units=" + units +
-                ", value=" + value +
+                ", value=" + value.setScale(2).toPlainString() +
                 '}';
     }
 }

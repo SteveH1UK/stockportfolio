@@ -45,7 +45,7 @@ public class CustomerStockResult {
         return "CustomerStockResult{" +
                 "customerId=" + customerId +
                 ", requestDate=" + requestDate +
-                ", valueSum=" + valueSum +
+                ", valueSum=" + valueSum.setScale(2).toPlainString() +
                 ", customerStocks=" + customerStocks +
                 '}';
     }

@@ -3,6 +3,9 @@ package com.steveh1uk.stockportfolio.core.customer;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ *  A request for a customer's stocks for a specific date
+ */
 public class CustomerStockRequest {
 
     private final LocalDate selectedDate;

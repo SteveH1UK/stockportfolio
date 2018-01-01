@@ -3,7 +3,9 @@ package com.steveh1uk.stockportfolio.core.pricing.iextrading;
 import com.steveh1uk.stockportfolio.core.pricing.PricingRequest;
 import com.steveh1uk.stockportfolio.core.pricing.PricingResponse;
 import com.steveh1uk.stockportfolio.core.pricing.StockPricingService;
+import com.steveh1uk.stockportfolio.core.pricing.exception.PricingException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
@@ -11,17 +13,22 @@ import java.math.BigDecimal;
 @Service
 public class StockPricingServiceIextrading implements StockPricingService {
 
-    // TODO - Exception handling (service down, stock not found)
     @Override
     public PricingResponse findPriceForStock(PricingRequest pricingRequest) {
 
-        RestTemplate restTemplate = new RestTemplate();
-
         String url = IextradingConstants.IEXTRADING_STOCK_API_URL + pricingRequest.getStockCode() + "/open-close";
 
-        OpenCloseResponseIextrading openCloseResponseIextrading = restTemplate.getForObject(url, OpenCloseResponseIextrading.class);
+        try {
 
-        return new PricingResponse(new BigDecimal(openCloseResponseIextrading.getClose().getPrice()));
+            RestTemplate restTemplate = new RestTemplate();
+
+            OpenCloseResponseIextrading openCloseResponseIextrading = restTemplate.getForObject(url, OpenCloseResponseIextrading.class);
+
+            return new PricingResponse(new BigDecimal(openCloseResponseIextrading.getClose().getPrice()));
+        }
+        catch (HttpStatusCodeException e){
+            throw new PricingException("HTTP Error calling " + url + " with status Code " + e.getStatusCode().value(), e);
+        }
 
     }
 }
