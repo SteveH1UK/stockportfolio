@@ -5,7 +5,12 @@ package com.steveh1uk.stockportfolio.core.exception;
  */
 public class StockPortfolioException extends RuntimeException {
 
-    public StockPortfolioException(String message, Throwable cause) {
+    protected StockPortfolioException(String message) {
+        super(message);
+    }
+
+
+    protected StockPortfolioException(String message, Throwable cause) {
         super(message, cause);
     }
 }

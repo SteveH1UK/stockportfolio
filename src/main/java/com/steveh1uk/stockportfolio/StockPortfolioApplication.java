@@ -9,12 +9,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.CommandLineRunner;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
 /**
  *  Run a stock request from the command line
  *  Use parameters:
  *  1 = Closing date (e.g. 2017-01-03)
- *  2 = Stock Code (e.g. GOOGL for Google inc)
+ *  2 = Customer ID (e.g. 74893279)
  */
 @SpringBootApplication
 public class StockPortfolioApplication implements CommandLineRunner {
@@ -24,7 +25,7 @@ public class StockPortfolioApplication implements CommandLineRunner {
 
 	/**
 	 * Run stock portfolio on the command line
-	 * @param args
+	 * @param args - command line arguments
 	 */
 	public static void main(String[] args) {
 		SpringApplication application = new SpringApplication(StockPortfolioApplication.class);
@@ -49,9 +50,18 @@ public class StockPortfolioApplication implements CommandLineRunner {
 
 	private CustomerStockRequest createCustomerStockRequest(String... args) {
 
-        LocalDate selectedDate = LocalDate.parse(args[0]);
-        int customerId = Integer.parseInt(args[1]);
+        try {
+            LocalDate selectedDate = LocalDate.parse(args[0]);
+            int customerId = Integer.parseInt(args[1]);
 
-		return new CustomerStockRequest(selectedDate, customerId);
+            return new CustomerStockRequest(selectedDate, customerId);
+        } catch (DateTimeParseException e) {
+            System.out.println("ERROR: Invalid date entered - " + e.getMessage());
+            System.exit(-1);
+        } catch (NumberFormatException e) {
+            System.out.println("ERROR: Invalid customer id entered (it must be a number) - " + e.getMessage());
+            System.exit(-1);
+        }
+        return null;
 	}
 }

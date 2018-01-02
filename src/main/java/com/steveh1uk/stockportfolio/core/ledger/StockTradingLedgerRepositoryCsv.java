@@ -13,17 +13,13 @@ import org.springframework.stereotype.Repository;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- *
- *   Could read into a list of stock transactions and sort this by date
- *
- */
 @Repository
 public class StockTradingLedgerRepositoryCsv implements StockTradingLedgerRepository {
 
@@ -35,6 +31,8 @@ public class StockTradingLedgerRepositoryCsv implements StockTradingLedgerReposi
     private final static String UNITS_BOUGHT_HEADER = "Units bought";
     private final static String UNITS_SOLD_HEADER = "Units Sold";
 
+    private static final String CAN_NOT_INITIALISE_THE_STOCK_LEDGER_CSV_FILE = "Can not initialise the stock ledger csv file ";
+
     @Autowired
     ResourceLoader resourceloader;
 
@@ -43,8 +41,7 @@ public class StockTradingLedgerRepositoryCsv implements StockTradingLedgerReposi
 
         List<StockTransaction> stockTransactions = new ArrayList<>();
         int recordNumber = 1;
-        ClassPathResource classPathResource = new ClassPathResource(stockLedgerFileName());
-        try (Reader in = new InputStreamReader(classPathResource.getInputStream()) ) {
+        try (Reader in = csvReader()) {
 
                 Iterable<CSVRecord> records = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(in);
             for (CSVRecord record : records) {
@@ -68,10 +65,35 @@ public class StockTradingLedgerRepositoryCsv implements StockTradingLedgerReposi
             throw new StockLedgerParseException("Error in record " + recordNumber + " within " + stockLedgerFileName() + " because " + e.getMessage(), e);
         }
         catch (IOException | NullPointerException e) {
-            throw new StockLedgerParseException("Can not initialise the stock ledger csv file " + stockLedgerFileName(), e);
+            throw new StockLedgerParseException(CAN_NOT_INITIALISE_THE_STOCK_LEDGER_CSV_FILE + stockLedgerFileName(), e);
         }
 
         return stockTransactions;
+    }
+
+    @Override
+    public LocalDate findEarliestDateOnLedger() {
+
+        try (Reader in = csvReader()) {
+
+            Iterable<CSVRecord> records = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(in);
+            CSVRecord record = records.iterator().next();
+            LocalDateTime earliestDate = ZonedDateTime.parse(record.get(TRADE_DATE_TIME_HEADER)).toLocalDateTime();
+            return earliestDate.toLocalDate();
+
+        }
+        catch(DateTimeParseException | IllegalArgumentException e) {
+            throw new StockLedgerParseException("Error in first data record within " + stockLedgerFileName() + " because " + e.getMessage(), e);
+        }
+        catch (IOException | NullPointerException e) {
+            throw new StockLedgerParseException(CAN_NOT_INITIALISE_THE_STOCK_LEDGER_CSV_FILE + stockLedgerFileName(), e);
+        }
+    }
+
+    private Reader csvReader() throws IOException {
+
+        ClassPathResource classPathResource = new ClassPathResource(stockLedgerFileName());
+        return new InputStreamReader(classPathResource.getInputStream());
     }
 
     private int parseIntSettingEmptyStringToZero(String value) {

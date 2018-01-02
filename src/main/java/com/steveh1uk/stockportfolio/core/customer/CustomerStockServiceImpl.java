@@ -1,16 +1,18 @@
 package com.steveh1uk.stockportfolio.core.customer;
 
+import com.steveh1uk.stockportfolio.core.customer.exception.CustomerException;
 import com.steveh1uk.stockportfolio.core.exception.StockPortfolioException;
 import com.steveh1uk.stockportfolio.core.ledger.StockTradingLedgerRepository;
 import com.steveh1uk.stockportfolio.core.ledger.StockTransaction;
 import com.steveh1uk.stockportfolio.core.pricing.PricingRequest;
 import com.steveh1uk.stockportfolio.core.pricing.PricingResponse;
 import com.steveh1uk.stockportfolio.core.pricing.StockPricingService;
+import com.steveh1uk.stockportfolio.core.pricing.StockValueCalculator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,6 +26,12 @@ public class CustomerStockServiceImpl implements CustomerStockService {
 
     @Autowired
     private StockTradingLedgerRepository stockTradingLedgerRepository;
+
+
+    @Override
+    public LocalDate findEarliestDateOnLedger() {
+        return stockTradingLedgerRepository.findEarliestDateOnLedger();
+    }
 
     @Override
     public CustomerStockResult findStockValues(CustomerStockRequest  customerStockRequest) throws StockPortfolioException {
@@ -42,6 +50,18 @@ public class CustomerStockServiceImpl implements CustomerStockService {
      */
     private void validateRequest(CustomerStockRequest customerStockRequest) {
 
+        if (customerStockRequest.getSelectedDate() == null) {
+            throw new CustomerException("You must enter a date");
+        }
+
+        LocalDate earliestDate = stockTradingLedgerRepository.findEarliestDateOnLedger();
+        if (customerStockRequest.getSelectedDate().isBefore(earliestDate)) {
+            throw new CustomerException("You must enter a date after the earliest date on the stock ledger which is " + earliestDate);
+        }
+
+        if (customerStockRequest.getSelectedDate().isAfter(LocalDate.now())) {
+            throw new CustomerException("You must must not enter a date in the future");
+        }
     }
     
     private CustomerStockResult createCustomerStockResult(CustomerStockRequest customerStockRequest, Map<String, Integer> customerStockCount) {
@@ -53,15 +73,11 @@ public class CustomerStockServiceImpl implements CustomerStockService {
         for (Map.Entry<String, Integer> stockCount : customerStockCount.entrySet()
              ) {
 
-            // Get the stock value  from the rest service and then multiple by the number of shares
-            BigDecimal stockValue = findStockPrice(stockCount); //BigDecimal.ZERO;
+            BigDecimal stockValue = findStockPrice(stockCount);
 
             customerStocks.add(new CustomerStock(stockCount.getKey(), stockCount.getValue(), stockValue));
 
-
-            MathContext mc = new MathContext(2);
-            totalValue = totalValue.add(stockValue, mc);
-
+            totalValue = totalValue.add(stockValue);
         }
         customerStockResult.setCustomerStocks(customerStocks);
         customerStockResult.setValueSum(totalValue);
@@ -75,9 +91,7 @@ public class CustomerStockServiceImpl implements CustomerStockService {
 
         PricingResponse pricingResponse = stockPricingService.findPriceForStock(pricingRequest);
 
-        MathContext mc = new MathContext(2);
-
-        return pricingResponse.getStockUnitPrice().multiply( new BigDecimal(stockCount.getValue()), mc);
+        return StockValueCalculator.multiple(pricingResponse.getStockUnitPrice(), stockCount.getValue());
     }
 
 

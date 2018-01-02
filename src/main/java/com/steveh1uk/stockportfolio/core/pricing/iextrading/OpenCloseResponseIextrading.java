@@ -20,7 +20,7 @@ Example json
 }
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class OpenCloseResponseIextrading {
+class OpenCloseResponseIextrading {
 
     private PriceTimeIextrading open;
 

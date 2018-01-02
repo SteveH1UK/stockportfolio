@@ -3,6 +3,9 @@ package com.steveh1uk.stockportfolio.core.customer;
 import java.math.BigDecimal;
 import java.util.Objects;
 
+/**
+ *  One set of stock that a customer owns
+ */
 public class CustomerStock implements Comparable<CustomerStock> {
 
     private final String stockCode;

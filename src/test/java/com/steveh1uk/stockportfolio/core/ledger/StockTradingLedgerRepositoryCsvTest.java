@@ -48,7 +48,14 @@ public class StockTradingLedgerRepositoryCsvTest {
         expectedResultsRequestOne.add(new StockTransaction.Builder().setTradeDateTime(LocalDateTime.parse("2017-01-03T05:00:00")).setCustomerId(CUSTOMER_ID_REQUEST_ONE).setStockCode("NOK").setUnitsBought(4).setUnitsSold(0).build());
 
         return expectedResultsRequestOne;
+    }
 
+    @Test
+    public void findEarliestDateTime() {
+
+        LocalDate earliestDate = new StockTradingLedgerRepositoryCsv().findEarliestDateOnLedger();
+
+        assertEquals(LocalDate.parse("2017-01-01"), earliestDate);
     }
 
 
@@ -66,7 +73,6 @@ public class StockTradingLedgerRepositoryCsvTest {
     @Test
     public void stockLedgerNotFound() {
 
-        CustomerStockRequest customerStockRequest = new CustomerStockRequest(LocalDate.parse("2017-01-03"), CUSTOMER_ID_REQUEST_ONE);
         thrown.expect(StockLedgerParseException.class);
 
         thrown.expectMessage("Can not initialise the stock ledger csv file missing-stock-ledger.csv");
@@ -77,7 +83,7 @@ public class StockTradingLedgerRepositoryCsvTest {
             protected String stockLedgerFileName() {
                 return "missing-stock-ledger.csv";
             }
-        }.findCustomerStockTransactions(customerStockRequest);
+        }.findEarliestDateOnLedger();
     }
 
 

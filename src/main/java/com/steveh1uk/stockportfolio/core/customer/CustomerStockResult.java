@@ -4,6 +4,9 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
 
+/**
+ *   The result of a call to get the customer stock for a customer
+ */
 public class CustomerStockResult {
 
     private final int customerId;

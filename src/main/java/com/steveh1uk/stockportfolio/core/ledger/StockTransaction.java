@@ -8,7 +8,6 @@ import java.util.Objects;
 /**
  *  This represents a historic stock transaction and it is recorded as one line in the stock ledger
  *
- *
  */
 public class StockTransaction {
 

@@ -4,6 +4,7 @@ import com.steveh1uk.stockportfolio.core.customer.CustomerStock;
 import com.steveh1uk.stockportfolio.core.customer.CustomerStockRequest;
 import com.steveh1uk.stockportfolio.core.customer.CustomerStockResult;
 import com.steveh1uk.stockportfolio.core.customer.CustomerStockService;
+import com.steveh1uk.stockportfolio.core.customer.exception.CustomerException;
 import com.steveh1uk.stockportfolio.core.pricing.PricingRequest;
 import com.steveh1uk.stockportfolio.core.pricing.PricingResponse;
 import com.steveh1uk.stockportfolio.core.pricing.StockPricingService;
@@ -31,6 +32,8 @@ import static org.junit.Assert.*;
 @SpringBootTest
 public class StockPortfolioApplicationTests {
 
+    private static int CUSTOMER_WITH_DATA = 74893279;
+
 	@Autowired
 	private CustomerStockService customerStockService;
 
@@ -40,13 +43,14 @@ public class StockPortfolioApplicationTests {
 	@Test
 	public  void successPath() {
 
-	    int customerId = 74893279;
-		CustomerStockRequest customerStockRequest = new CustomerStockRequest(LocalDate.parse("2017-01-03"), customerId);
+		CustomerStockRequest customerStockRequest = new CustomerStockRequest(LocalDate.parse("2017-01-03"), CUSTOMER_WITH_DATA);
 
 		CustomerStockResult customerStockResult = customerStockService.findStockValues(customerStockRequest);
 
+        System.out.println(customerStockResult);
+
         // Check symbols and counts. Also check that the order is alphabetic. For values check greater or less than
-        assertEquals(customerId, customerStockResult.getCustomerId());
+        assertEquals(CUSTOMER_WITH_DATA, customerStockResult.getCustomerId());
         assertNotNull(customerStockResult.getRequestDate());
         assertTrue("Sum of stock", customerStockResult.getValueSum().intValue() < 0 );
         assertEquals("Number of stocks", 5, customerStockResult.getCustomerStocks().size());
@@ -76,7 +80,7 @@ public class StockPortfolioApplicationTests {
                     assertTrue(currentStock.getValue().intValue() > 0);
                     break;
                 case 4:
-                    assertEquals("NOK", currentStock.getStockCode());
+                    assertEquals(   "NOK", currentStock.getStockCode());
                     assertEquals(4, currentStock.getUnits());
                     assertTrue(currentStock.getValue().intValue() > 0);
                     break;
@@ -84,6 +88,28 @@ public class StockPortfolioApplicationTests {
         }
 	}
 
+    @Test
+    public  void noCustomer() {
+
+	    int nonExistingCustomerId = -1;
+        CustomerStockRequest customerStockRequest = new CustomerStockRequest(LocalDate.parse("2017-01-03"), nonExistingCustomerId);
+
+        CustomerStockResult customerStockResult = customerStockService.findStockValues(customerStockRequest);
+
+        // Check symbols and counts. Also check that the order is alphabetic. For values check greater or less than
+        assertEquals(nonExistingCustomerId, customerStockResult.getCustomerId());
+        assertNotNull(customerStockResult.getRequestDate());
+        assertTrue("Sum of stock", customerStockResult.getValueSum().intValue() == 0);
+        assertEquals("Number of stocks", 0, customerStockResult.getCustomerStocks().size());
+    }
+
+	@Test
+    public void findEarliestDateViaServiceFacade() {
+
+        LocalDate earliestDate = customerStockService.findEarliestDateOnLedger();
+
+        assertEquals(LocalDate.parse("2017-01-01"), earliestDate);
+    }
 
 	@Test
 	public void priceQuote() {
@@ -120,4 +146,42 @@ public class StockPortfolioApplicationTests {
 
 	}
 
+    @Test
+    public void mustEnterADate() {
+
+        CustomerStockRequest customerStockRequest = new CustomerStockRequest(null, CUSTOMER_WITH_DATA);
+
+        thrown.expect(CustomerException.class);
+
+        thrown.expectMessage("You must enter a date");
+
+        customerStockService.findStockValues(customerStockRequest);
+    }
+
+	@Test
+    public void mustNotEnterFutureDate() {
+
+	    LocalDate futureDate = LocalDate.now().plusDays(1L);
+	    CustomerStockRequest customerStockRequest = new CustomerStockRequest(futureDate, CUSTOMER_WITH_DATA);
+
+        thrown.expect(CustomerException.class);
+
+        thrown.expectMessage("You must must not enter a date in the future");
+
+        customerStockService.findStockValues(customerStockRequest);
+    }
+
+
+    @Test
+    public void mustNotEnterADateBeforeStartOfLedger() {
+
+        LocalDate tooEarlyDate = LocalDate.parse("2016-12-30");
+        CustomerStockRequest customerStockRequest = new CustomerStockRequest(tooEarlyDate, CUSTOMER_WITH_DATA);
+
+        thrown.expect(CustomerException.class);
+
+        thrown.expectMessage("You must enter a date after the earliest date on the stock ledger which is 2017-01-01");
+
+        customerStockService.findStockValues(customerStockRequest);
+    }
 }

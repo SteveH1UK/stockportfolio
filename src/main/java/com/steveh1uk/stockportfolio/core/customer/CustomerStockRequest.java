@@ -15,7 +15,7 @@ public class CustomerStockRequest {
 
     public CustomerStockRequest(LocalDate selectedDate, int customerId) {
         this.selectedDate = selectedDate;
-        this.closingDateCeiling = selectedDate.plusDays(1L).atStartOfDay();
+        this.closingDateCeiling = (selectedDate != null) ? selectedDate.plusDays(1L).atStartOfDay() : null;
         this.customerId = customerId;
     }
 
